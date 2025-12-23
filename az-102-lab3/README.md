@@ -24,30 +24,12 @@ By the end of this lab, you will have:
 
 After Lab 3:
 
-```text
-         Hub VNet (10.100.0.0/16)
-      ┌──────────────────────────────┐
-      │  FortiGate HA Cluster        │
-      │  ┌────────────────────────┐  │
-      │  │ Internal LB: 10.100.2.4│◄─┼─── All traffic
-      │  │    (Next-Hop)          │  │    forced here
-      │  └────────────────────────┘  │    by UDRs
-      └──────────────────────────────┘
-           ▲         ▲         ▲
-           │         │         │
-      UDRs force traffic through ILB
-           │         │         │
-    ┌──────┴───┐ ┌──┴──────┐ ┌┴────────┐
-    │ Frontend │ │ Backend │ │Database │
-    │  VNet    │ │  VNet   │ │  VNet   │
-    │          │ │         │ │         │
-    │ RT:      │ │ RT:     │ │ RT:     │
-    │ 0/0→ILB  │ │ 0/0→ILB │ │ 0/0→ILB │
-    └──────────┘ └─────────┘ └─────────┘
+![lab3-reference-architecture](images/lab3-reference-architecture.png)
 
-Result: All traffic inspected by FortiGate
-(Connectivity broken until Lab 4 policies)
-```
+#### Result
+
+- All traffic inspected by FortiGate
+- Connectivity broken until Lab 4 policies
 
 ### Business Context
 
@@ -146,11 +128,11 @@ FortiGate inspects, applies policy
    ↓ (if allowed, forwards)
 FortiGate sends back to port2
    ↓
-Internal LB routes to destination
+FortiGate sends directly to Azure default gateway (10.100.2.1)
    ↓
-Backend VM (10.102.1.4)
+Azure routing via VNet peering
    ↓
-[Route now exists - full inspection and logging]
+Backend VM (10.102.1.4) receives packet
 [But blocked until Lab 4 policies added]
 ```
 
@@ -168,6 +150,8 @@ Backend VM (10.102.1.4)
    - Search: `route table`
    - Click **Create > Route table**
 
+   ![create-route-table](images/step1.1.1-create-rt.gif)
+
 #### 1.2 Configure Route Table
 
 1. **Basics Tab:**
@@ -176,6 +160,8 @@ Backend VM (10.102.1.4)
    - **Region:** `Canada Central`
    - **Name:** `Redwood-Frontend-RT`
    - **Propagate gateway routes:** `No`
+
+   ![route-table-creation](images/step1.2-rt-creation.png)
 
    > [!NOTE]
    > **Propagate gateway routes = No** prevents VPN/ExpressRoute routes from overriding our UDRs
@@ -203,6 +189,8 @@ Backend VM (10.102.1.4)
    - **Next hop type:** `Virtual appliance`
    - **Next hop address:** `10.100.2.4`
 
+   ![create-route](images/step2.2-create-route.png)
+
    > [!WARNING]
    > **Critical:** Next-hop must be exactly `10.100.2.4` (Internal LB IP from Lab 1)
    > Any typo here breaks all traffic flow
@@ -221,17 +209,19 @@ Backend VM (10.102.1.4)
 
 1. **Associate Subnet:**
    - **Virtual network:** `Redwood-Frontend-VNet`
-   - **Subnet:** `Protected-Subnet`
+   - **Subnet:** `Protected`
    - Click **OK**
 
+   ![associate-subnet](images/step3-associate-subnet.png)
+
    > [!NOTE]
-   > Association takes effect immediately. All VMs in Frontend-VNet/Protected-Subnet now use this route table.
+   > Association takes effect immediately. All VMs in Frontend-VNet/Protected subnet now use this route table.
 
 ### Validation
 
 - ✅ Route table created: Redwood-Frontend-RT
 - ✅ Default route added: 0.0.0.0/0 → 10.100.2.4
-- ✅ Associated with Redwood-Frontend-VNet/Protected-Subnet
+- ✅ Associated with Redwood-Frontend-VNet/Protected subnet
 
 ---
 
@@ -280,14 +270,14 @@ Backend VM (10.102.1.4)
 
 2. **Configure:**
    - **Virtual network:** `Redwood-Backend-VNet`
-   - **Subnet:** `Protected-Subnet`
+   - **Subnet:** `Protected`
    - Click **OK**
 
 ### Validation
 
 - ✅ Route table created: Redwood-Backend-RT
 - ✅ Default route added: 0.0.0.0/0 → 10.100.2.4
-- ✅ Associated with Redwood-Backend-VNet/Protected-Subnet
+- ✅ Associated with Redwood-Backend-VNet/Protected subnet
 
 ---
 
@@ -336,14 +326,14 @@ Backend VM (10.102.1.4)
 
 2. **Configure:**
    - **Virtual network:** `Redwood-Database-VNet`
-   - **Subnet:** `Protected-Subnet`
+   - **Subnet:** `Protected`
    - Click **OK**
 
 ### Validation
 
 - ✅ Route table created: Redwood-Database-RT
 - ✅ Default route added: 0.0.0.0/0 → 10.100.2.4
-- ✅ Associated with Redwood-Database-VNet/Protected-Subnet
+- ✅ Associated with Redwood-Database-VNet/Protected subnet
 
 ---
 
@@ -356,12 +346,15 @@ Backend VM (10.102.1.4)
 1. **Navigate to Redwood-Frontend-RT:**
    - Go to **Redwood-Frontend-RG > Redwood-Frontend-RT**
    - Click **Help > Effective routes**
+   - Select one **Network Interface** (effective routes are the same for VMs in the same subnet)
 
 2. **Verify Effective Routes:**
    - You should see routes including:
      - **0.0.0.0/0** → Next hop: 10.100.2.4 (Virtual appliance)
      - Local VNet routes (10.101.0.0/16)
      - Peering routes to hub
+
+    ![effective-route](images/step10.1.2-effective-route.png)
 
 #### 10.2 Check Backend Route Table
 
@@ -380,7 +373,7 @@ Backend VM (10.102.1.4)
 #### 11.1 Check Frontend VM Routes
 
 1. **Navigate to Frontend VM 1:**
-   - Go to **Redwood-Frontend-RG > Redwood-Frontend-VM**
+   - Go to **Redwood-Frontend-RG > Redwood-Frontend-VM-1**
    - Click **Networking > Network Settings > Network interface**
    - Click **Help > Effective routes**
 
@@ -389,6 +382,8 @@ Backend VM (10.102.1.4)
    - **Address prefix: 0.0.0.0/0**
    - **Next hop type: Virtual appliance**
    - **Next hop IP: 10.100.2.4**
+
+   ![vm-effective-route](images/step11-verify-effective-route.gif)
 
    > [!NOTE]
    > This confirms the VM is using your UDR
@@ -408,10 +403,23 @@ Verify Backend VM and Database VM also show the UDR in their effective routes.
 **From Frontend VM (via Serial Console or SSH from FortiGate):**
 
 ```bash
-ping -c 3 8.8.8.8
+dig @1.1.1.1 google.com
 ```
 
 **Expected Result:**
+
+```bash
+azureuser@Redwood-Frontend-VM-1:~$ dig @1.1.1.1 google.com
+;; communications error to 1.1.1.1#53: timed out
+;; communications error to 1.1.1.1#53: timed out
+;; communications error to 1.1.1.1#53: timed out
+
+; <<>> DiG 9.18.39-0ubuntu0.24.04.2-Ubuntu <<>> @1.1.1.1 google.com
+; (1 server found)
+;; global options: +cmd
+;; no servers could be reached
+azureuser@Redwood-Frontend-VM-1:~$
+```
 
 - ❌ **Fails** (timeout)
 - **Why:** Traffic routed to FortiGate, but no policies allow it yet
@@ -427,22 +435,24 @@ ping -c 3 10.103.1.4  # Database VM
 
 **Expected Result:**
 
-- ❌ **Both fail**
-- **Why:** Traffic forced through FortiGate, no policies configured
-
-#### 12.3 Test Hub Connectivity
-
-**From Frontend VM:**
-
 ```bash
-# Try to reach FortiGate's internal interface
-ping -c 3 10.100.2.4
+azureuser@Redwood-Frontend-VM-1:~$ ping -c 3 10.102.1.4 
+PING 10.102.1.4 (10.102.1.4) 56(84) bytes of data.
+
+--- 10.102.1.4 ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2076ms
+
+azureuser@Redwood-Frontend-VM-1:~$ ping -c 3 10.103.1.4 
+PING 10.103.1.4 (10.103.1.4) 56(84) bytes of data.
+
+--- 10.103.1.4 ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2049ms
+
+azureuser@Redwood-Frontend-VM-1:~$ 
 ```
 
-**Expected Result:**
-
-- ❌ **Likely fails**
-- **Why:** ICMP may be blocked by FortiGate default policy
+- ❌ **Both fail**
+- **Why:** Traffic forced through FortiGate, no policies configured
 
 > [!WARNING]
 > **Connectivity Broken By Design**
@@ -514,8 +524,7 @@ Frontend VM (10.101.1.4)
 **In our case:**
 
 - UDR (0.0.0.0/0 → 10.100.2.4) overrides everything
-- Even more specific routes use our next-hop
-- Only exception: local subnet routes (can't override)
+- More specific routes may not use our next-hop if a better match is found
 
 ### Why Default Route (0.0.0.0/0)?
 
@@ -589,32 +598,16 @@ You have successfully configured routing infrastructure:
 
 ### Architecture Review
 
-```text
 Routing Configuration After Lab 3:
 
-         Hub VNet (10.100.0.0/16)
-      ┌────────────────────────────────┐
-      │  Internal LB: 10.100.2.4       │◄─┐
-      │  ↓                             │  │
-      │  Active FortiGate              │  │
-      │  (No policies yet)             │  │
-      │  ↓                             │  │
-      │  Implicit DENY all             │  │
-      └────────────────────────────────┘  │
-                                          │
-      All traffic from spokes forced here │
-                                          │
-    ┌──────────────┬──────────────┬──────┴──┐
-    │              │              │         │
-    │ Frontend     │ Backend      │Database │
-    │ RT:          │ RT:          │ RT:     │
-    │ 0/0→10.100   │ 0/0→10.100   │0/0→10.  │
-    │   .2.4       │   .2.4       │  100.2.4│
-    └──────────────┴──────────────┴─────────┘
+![lab3-reference-architecture](images/lab3-reference-architecture.png)
 
-Result: All traffic blocked (no FortiGate policies)
-Next: Lab 4 creates policies to allow traffic
-```
+#### Result
+
+- All traffic blocked (no FortiGate policies)
+- Next: Lab 4 creates policies to allow traffic
+
+---
 
 ### Key Takeaways
 
@@ -807,10 +800,9 @@ For intra-subnet inspection:
 ---
 
 **End of Lab 3**  
-*Estimated completion time: 30 minutes*  
-*Next: Lab 4 - Security Policies and Testing*
+
+*Next*: [*Lab 4 - Security Policies and Testing*](/az-102-lab4/README.md)
 
 ---
 
 *Lab Guide Version 1.0 - December 2024*  
-*Questions? Ask your instructor or refer to the troubleshooting section.*
