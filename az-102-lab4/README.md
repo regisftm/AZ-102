@@ -288,6 +288,8 @@ This policy allows all spokes to access the internet with NAT.
    - **Policy & Objects > Firewall Policy**
    - Review existing policies (likely only implicit deny)
 
+   ![implicit-deny](images/step4.1.1-implicit-deny.png)
+
 #### 4.2 Create Internet Access Policy
 
 1. **Create New Policy:**
@@ -295,6 +297,8 @@ This policy allows all spokes to access the internet with NAT.
 
 2. **Configure Policy:**
    - **Name:** `Spokes-to-Internet`
+   - **Schedule:** `always`
+   - **Action:** `ACCEPT`
    - **Incoming Interface:** `port2` (Internal)
    - **Outgoing Interface:** `port1` (External)
    - **Source:**
@@ -302,9 +306,9 @@ This policy allows all spokes to access the internet with NAT.
      - Select `Redwood-All-Spokes` (the group we created)
      - Click **Close**
    - **Destination:** `all`
-   - **Schedule:** `always`
    - **Service:** `ALL`
-   - **Action:** `ACCEPT`
+
+   ![alt text](images/step4.2.2-create-policy-1.png)
 
 3. **Configure NAT:**
    - Scroll down to **NAT** section
@@ -315,6 +319,8 @@ This policy allows all spokes to access the internet with NAT.
    - Scroll to **Logging Options**
    - **Log Allowed Traffic:** `All Sessions`
    - This logs every connection for visibility
+
+   ![create-policy](images/step4.2.4-create-policy-2.png)
 
 5. **Click OK**
 
@@ -373,7 +379,7 @@ Returns to Frontend VM via port2
 
 #### 5.1 Access Frontend VM 1
 
-**Method: Azure Serial Console**
+**Method**: **Azure Serial Console**
 
 1. **Navigate to Frontend VM:**
    - Azure Portal > **Redwood-Frontend-RG**
@@ -390,7 +396,7 @@ Returns to Frontend VM via port2
 
 #### 5.2 Test Internet Access
 
-**From Frontend VM:**
+**From Frontend VM 1:**
 
 **Test DNS Resolution:**
 
@@ -401,17 +407,68 @@ dig www.google.com
 # Expected: Resolves to IP succeed
 ```
 
+Expected result:
+
+```bash
+azureuser@Redwood-Frontend-VM-1:~$ azureuser@Redwood-Frontend-VM-1:~$ dig www.azure.com
+
+; <<>> DiG 9.18.39-0ubuntu0.24.04.2-Ubuntu <<>> www.azure.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 5030
+;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;www.azure.com.                 IN      A
+
+;; ANSWER SECTION:
+www.azure.com.          1512    IN      CNAME   reroute.microsoft.com.
+reroute.microsoft.com.  1512    IN      CNAME   reroute443.trafficmanager.net.
+reroute443.trafficmanager.net. 60 IN    A       20.112.250.133
+reroute443.trafficmanager.net. 60 IN    A       20.231.239.246
+
+;; Query time: 6 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Tue Dec 23 12:02:41 UTC 2025
+;; MSG SIZE  rcvd: 149
+
+azureuser@Redwood-Frontend-VM-1:~$
+```
+
 **Test HTTPS:**
+
 ```bash
 # Test web access
-curl -I https://www.fortinet.com
+curl -sI https://www.fortinet.com
 
-# Expected: HTTP 200 OK response
+```
+
+Expected: HTTP 200 OK response
+
+```bash
+azureuser@Redwood-Frontend-VM-1:~$ curl -sI https://www.fortinet.com
+HTTP/1.1 200 OK
+Content-Type: text/html;charset=utf-8
+Content-Length: 421599
+Connection: keep-alive
+Date: Tue, 23 Dec 2025 11:09:02 GMT
+
+--- Edited ---
+
+X-Amz-Cf-Pop: YUL62-P2
+X-Amz-Cf-Id: YbDyLX110G2FVXuipZlyUI97TTpjpDD7SRgNeU_5XGVcW6Cnx1GA1w==
+Age: 1868
+Set-Cookie: cookiesession1=678A3E24FB4324682AAD03B1F138047E;Expires=Wed, 23 Dec 2026 11:37:27 GMT;Path=/
+X-XSS-Protection: 1; mode=block
+
+azureuser@Redwood-Frontend-VM-1:~$ 
 ```
 
 #### 5.3 Test from Other Spokes
 
-**Method: SSH session from FortiGate CLI**
+**Method**: **SSH session from FortiGate CLI**
 
 **Backend VM:**
 
@@ -424,7 +481,24 @@ curl -I https://www.fortinet.com
 2. Test internet:
 
    ```bash
-   curl -I https://www.microsoft.com
+   curl -sI https://www.microsoft.com
+   ```
+
+   Expected result:
+
+   ```bash
+   azureuser@Redwood-Backend-VM:~$ curl -sI https://www.microsoft.com
+   HTTP/2 200 
+   server: AkamaiGHost
+   mime-version: 1.0
+   content-type: text/html
+   content-length: 421
+   expires: Tue, 23 Dec 2025 11:42:32 GMT
+   cache-control: max-age=0, no-cache, no-store
+   pragma: no-cache
+   date: Tue, 23 Dec 2025 11:42:32 GMT
+
+   azureuser@Redwood-Backend-VM:~$ 
    ```
 
 **Database VM:**
@@ -439,7 +513,28 @@ curl -I https://www.fortinet.com
 3. Test internet:
 
    ```bash
-   curl -I https://www.fortinet.com
+   curl -sI https://www.fortinet.com
+   ```
+
+   Expected result:
+
+   ```bash
+   azureuser@Redwood-Database-VM:~$ curl -sI https://www.fortinet.com
+   HTTP/1.1 200 OK
+   Content-Type: text/html;charset=utf-8
+   Content-Length: 421599
+   Connection: keep-alive
+   Date: Tue, 23 Dec 2025 11:09:02 GMT
+   
+   --- Edited ---
+
+   X-Amz-Cf-Pop: YUL62-P2
+   X-Amz-Cf-Id: qLhAbnDs3_sUKghxpyrdjo5fu9YxIgpJy_fPKu0Fo4FqaoIJivvvbg==
+   Age: 2302
+   Set-Cookie: cookiesession1=678A3E240C2897D79615A51D30663AA5;Expires=Wed, 23 Dec 2026 11:44:41 GMT;Path=/
+   X-XSS-Protection: 1; mode=block
+
+   azureuser@Redwood-Database-VM:~$ 
    ```
 
 ### Validation - Internet Connectivity
@@ -467,6 +562,8 @@ curl -I https://www.fortinet.com
    - **Action:** accept
    - **NAT:** Yes (source NAT applied)
 
+   ![forward-traffic](images/step6.1.2-fwd-logs.png)
+
 3. **Filter Traffic:**
    - Click **Advanced Filters**
    - **Source IP:** Enter `10.101.1.4`
@@ -477,24 +574,33 @@ curl -I https://www.fortinet.com
    - Click on any log entry
    - Review fields:
      - **Sent/Received bytes:** Shows data transferred
-     - **Source NAT IP:** FortiGate's External LB Public IP
+     - **Source NAT IP:** FortiGate's external interface
      - **Duration:** Session length
-     - **Application:** Detected application (PING, HTTPS, etc.)
+     - **Application:** Detected application (HTTPS)
 
 ### Understanding Log Fields
 
 **Key Fields:**
+
 - **srcip:** Original source IP (spoke VM)
 - **srcport:** Source port (random high port)
 - **dstip:** Destination IP (internet)
 - **dstport:** Destination port (80, 443, etc.)
 - **trandisp:** Action (accept/deny)
 - **policyid:** Which policy matched
-- **nat:** NAT applied (yes/no)
 - **sentbyte/rcvdbyte:** Traffic volume
 
 > [!IMPORTANT] Challenge ⚔️
 > Where you able to find the DNS request in the logs? Why?
+>
+> Test with the following commands from Frontend-VM-1:
+>
+> ```bash
+> dig @8.8.8.8 www.fortinet.com
+> dig @1.1.1.1 www.azure.com
+> ```
+>
+> Can you see the request in the log now? Why?
 
 ---
 
@@ -512,14 +618,14 @@ These policies allow spoke VNets to communicate with each other through FortiGat
 
 2. **Configure Policy:**
    - **Name:** `Frontend-to-Backend`
+   - **Schedule:** `always`
+   - **Action:** `ACCEPT`
    - **Incoming Interface:** `port2`
    - **Outgoing Interface:** `port2`
      - ⚠️ **Same interface** - this is east-west traffic
    - **Source:** `Redwood-Frontend-VNet`
    - **Destination:** `Redwood-Backend-VNet`
-   - **Schedule:** `always`
    - **Service:** `ALL`
-   - **Action:** `ACCEPT`
 
 3. **NAT Configuration:**
    - **NAT:** **OFF** (disabled)
@@ -538,12 +644,12 @@ These policies allow spoke VNets to communicate with each other through FortiGat
 
 2. **Configure (Reverse Direction):**
    - **Name:** `Backend-to-Frontend`
+   - **Action:** `ACCEPT`
    - **Incoming Interface:** `port2`
    - **Outgoing Interface:** `port2`
    - **Source:** `Redwood-Backend-VNet`
    - **Destination:** `Redwood-Frontend-VNet`
    - **Service:** `ALL`
-   - **Action:** `ACCEPT`
    - **NAT:** **OFF**
    - **Log Allowed Traffic:** `All Sessions`
 
@@ -553,15 +659,19 @@ These policies allow spoke VNets to communicate with each other through FortiGat
 
 **Create these policies following the same pattern:**
 
-**Backend-to-Database:**
+##### Backend-to-Database
+
 - Source: `Redwood-Backend-VNet`
 - Destination: `Redwood-Database-VNet`
 - NAT: OFF
 
-**Database-to-Backend:**
+##### Database-to-Backend
+
 - Source: `Redwood-Database-VNet`
 - Destination: `Redwood-Backend-VNet`
 - NAT: OFF
+
+![firewall-policies](images/step7.3-firewall-policies.png)
 
 > [!TIP]
 > **Quick Method:** Create first policy, then right-click > **Copy** and then right-click > **Paste > Below**. Edit the new policy and modify source/destination for faster creation.
@@ -613,6 +723,8 @@ If you have multiple VMs in the same VNet (like we have: Redwood-Frontend-VM-1 a
    - **Next hop address:** `10.100.2.4`
    - Click **Add**
 
+   ![microsegmentation](images/step7.4.1-microsgmentation.png)
+
 > [!NOTE]
 > This forces traffic between VMs in the same subnet through FortiGate. Without this route, VMs communicate directly via Azure's local routing.
 
@@ -624,13 +736,13 @@ If you have multiple VMs in the same VNet (like we have: Redwood-Frontend-VM-1 a
 
 2. **Configure Policy:**
    - **Name:** `Frontend-Intra-VNet`
+   - **Action:** `ACCEPT`
    - **Incoming Interface:** `port2`
    - **Outgoing Interface:** `port2`
    - **Source:** `Redwood-Frontend-VNet`
    - **Destination:** `Redwood-Frontend-VNet`
      - ⚠️ **Same VNet in both source and destination**
    - **Service:** `ALL`
-   - **Action:** `ACCEPT`
    - **NAT:** **OFF**
    - **Log Allowed Traffic:** `All Sessions`
 
@@ -648,6 +760,7 @@ ping -c 3 10.101.1.5
 ```
 
 **Verify in FortiGate Logs:**
+
 - **Log & Report > Forward Traffic**
 - Filter: Source = 10.101.1.4, Destination = 10.101.1.5
 - **Policy:** Should show "Frontend-Intra-VNet"
@@ -677,7 +790,7 @@ VM-2 (10.101.1.5)
 
 **Benefits:**
 
-- Zero-trust: Even VMs in same subnet are inspected
+- Zero-trust: Even traffic between VMs in same subnet are inspected
 - Granular control: Can allow/deny specific VM-to-VM traffic
 - Compliance: Some regulations require all traffic inspection
 
@@ -717,6 +830,7 @@ ping -c 3 10.102.1.4
 ```
 
 **Expected Result:**
+
 ```text
 PING 10.102.1.4 (10.102.1.4) 56(84) bytes of data.
 64 bytes from 10.102.1.4: icmp_seq=1 ttl=63 time=3.2 ms
@@ -767,18 +881,18 @@ ping -c 3 10.103.1.4
 Create a connectivity matrix to verify all paths:
 
 | From | To | Expected | Test Command |
-|------|-----|----------|--------------|
+| --- | --- | --- | --- |
 | Frontend-VM-1 | Frontend-VM-2 | ✅ Works * | `ping 10.101.1.5` |
 | Frontend-VM-1 | Backend | ✅ Works | `ping 10.102.1.4` |
 | Frontend-VM-1 | Database | ❌ Fail by design | `ping 10.103.1.4` |
 | Frontend-VM-2 | Frontend-VM-1 | ✅ Works * | `ping 10.101.1.4` |
 | Frontend-VM-2 | Backend | ✅ Works | `ping 10.102.1.4` |
-| Frontend-VM-2 | Database | ❌ Fail by design  | `ping 10.103.1.4` |
+| Frontend-VM-2 | Database | ❌ Fail by design | `ping 10.103.1.4` |
 | Backend | Frontend-VM-1 | ✅ Works | `ping 10.101.1.4` |
 | Backend | Frontend-VM-2 | ✅ Works | `ping 10.101.1.5` |
 | Backend | Database | ✅ Works | `ping 10.103.1.4` |
-| Database | Frontend-VM-1 | ❌ Fail by design  | `ping 10.101.1.4` |
-| Database | Frontend-VM-2 | ❌ Fail by design  | `ping 10.101.1.5` |
+| Database | Frontend-VM-1 | ❌ Fail by design | `ping 10.101.1.4` |
+| Database | Frontend-VM-2 | ❌ Fail by design | `ping 10.101.1.5` |
 | Database | Backend | ✅ Works | `ping 10.102.1.4` |
 
 *Intra-VNet communication (VM-1 ↔ VM-2) only goes through FortiGate if you configured Step 7.4 (micro-segmentation). Without it, these VMs communicate directly via Azure local routing.
@@ -812,6 +926,8 @@ Create a connectivity matrix to verify all paths:
    - **NAT:** No (source IP preserved)
    - **Action:** accept
 
+   ![log-verification](images/step9.1-verification.png)
+
 4. **Verify No NAT Applied:**
    - Check **srcip** field = original IP (10.101.1.4)
    - No NAT translation visible
@@ -840,17 +956,23 @@ FortiView provides real-time dashboards for understanding traffic patterns.
      - 10.102.1.4 (Backend VM)
      - 10.103.1.4 (Database VM)
 
+   ![fortiview-sources](images/step10.2.1-fortiview-sources.png)
+
 2. **Click on a Source:**
    - Click **10.101.1.4**
    - See all destinations this source communicated with:
      - 10.101.1.5 (Frontend VM-2, if micro-segmentation enabled)
      - 10.102.1.4 (Backend)
-     - 10.103.1.4 (Database)
+     - Internet destinations
+
+   ![fortiview-source-destination](images/step10.2.2-fortiview-source-destination.png)
 
 3. **Drill Down:**
    - Click on any destination
    - Select **View session logs**
    - See detailed traffic flows
+
+   ![drilldown](images/step10.2.3-drilldown.png)
 
 #### 10.3 Explore Destinations Dashboard
 
@@ -862,6 +984,8 @@ FortiView provides real-time dashboards for understanding traffic patterns.
      - 1.1.1.1 (Cloudflare DNS)
      - Other IPs from curl tests
    - Click on any destination to see sources
+
+   ![fortiview-destinations](images/step10.3.2-fortiview-destinations.png)
 
 #### 10.4 Explore Policy View
 
@@ -876,15 +1000,19 @@ FortiView provides real-time dashboards for understanding traffic patterns.
    - **Inter-VNet Policies:**
      - Similar statistics for east-west traffic
 
+   ![fortiview-policies](images/step10.4.2-fortiview-policies.png)
+
 ### Understanding FortiView
 
 **Business Value:**
+
 - **Troubleshooting:** Quickly identify connectivity issues
 - **Capacity Planning:** See bandwidth usage by source/destination
 - **Security:** Identify unusual traffic patterns
 - **Compliance:** Visual proof of traffic inspection
 
 **Key Views:**
+
 - **Sources:** Who is generating traffic
 - **Destinations:** Where traffic is going
 - **Applications:** What applications detected
@@ -905,6 +1033,8 @@ FortiView provides real-time dashboards for understanding traffic patterns.
    - Note which unit is Primary (Active)
    - Note which unit is Secondary (Passive)
 
+   ![ha-primary](images/step11.1.1-ha-primary.png)
+
 2. **Record Current Master:**
    - Example: `Redwood-Hub-FGT-A` is Primary
    - We'll force failover to FGT-B
@@ -919,12 +1049,12 @@ FortiView provides real-time dashboards for understanding traffic patterns.
    sudo apt update
    sudo apt-get install -y hping3
    ```
-   
+
 2. Start a continous traffic
 
 ```bash
 # Start continuous traffic
-sudo hping3 -S -p 80 server.bytesec.ca
+sudo hping3 -S -p 443 www.google.com
 
 # Leave this running during failover test
 # Don't stop - we're measuring packet loss
@@ -933,9 +1063,12 @@ sudo hping3 -S -p 80 server.bytesec.ca
 #### 11.3 Fail over
 
 1. **From Redwood Hub Group:**
+   - Open another tab in your browser
    - Navigate to **Redwood-Hub-RG**
    - Click on **Redwood-Hub-FGT-A** resource (Primary)
    - Click on `Stop` to stop the instance.
+
+   ![fgt-a-stop](images/step11.3.1-fgt-a-stop.gif)
   
 Once the primary instance is stopped, it will trigger an failover and the other instance will become the primary one.
 
@@ -944,17 +1077,24 @@ Once the primary instance is stopped, it will trigger an failover and the other 
 **Watch the Frontend VM ping output:**
 
 ```text
-azureuser@Redwood-Frontend-VM:~$ sudo hping3 -S -p 80 server.bytesec.ca
-HPING server.bytesec.ca (eth0 100.49.15.72): S set, 40 headers + 0 data bytes
-len=46 ip=100.49.15.72 ttl=50 DF id=0 sport=80 flags=SA seq=0 win=62727 rtt=22.9 ms
-len=46 ip=100.49.15.72 ttl=49 DF id=0 sport=80 flags=SA seq=1 win=62727 rtt=26.1 ms
-len=46 ip=100.49.15.72 ttl=49 DF id=0 sport=80 flags=SA seq=2 win=62727 rtt=21.7 ms
-len=46 ip=100.49.15.72 ttl=49 DF id=0 sport=80 flags=SA seq=3 win=62727 rtt=22.6 ms   ← Failover starts
-len=46 ip=100.49.15.72 ttl=49 DF id=0 sport=80 flags=SA seq=15 win=62727 rtt=22.3 ms  ← New unit taking over
-len=46 ip=100.49.15.72 ttl=50 DF id=0 sport=80 flags=SA seq=16 win=62727 rtt=20.3 ms
+azureuser@Redwood-Frontend-VM-1:~$ sudo hping3 -S -p 443 www.google.com
+HPING www.google.com (eth0 142.250.137.99): S set, 40 headers + 0 data bytes
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=0 win=65535 rtt=21.5 ms
+len=46 ip=142.250.137.99 ttl=115 DF id=0 sport=443 flags=SA seq=1 win=65535 rtt=19.4 ms
+...
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=165 win=65535 rtt=20.7 ms
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=166 win=65535 rtt=18.6 ms
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=167 win=65535 rtt=20.4 ms
+len=46 ip=142.250.137.99 ttl=114 DF id=0 sport=443 flags=SA seq=168 win=65535 rtt=20.2 ms    ← Failover starts
+len=46 ip=142.250.137.99 ttl=115 DF id=0 sport=443 flags=SA seq=181 win=65535 rtt=23.5 ms    ← New unit taking over
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=183 win=65535 rtt=19.2 ms
+len=46 ip=142.250.137.99 ttl=115 DF id=0 sport=443 flags=SA seq=185 win=65535 rtt=20.9 ms
+len=46 ip=142.250.137.99 ttl=116 DF id=0 sport=443 flags=SA seq=186 win=65535 rtt=20.8 ms
+...
 ```
 
 **Count Lost Packets:**
+
 - Typically 10-15 packets lost
 - At 1 second intervals = ~10-15 seconds downtime
 - Within acceptable SLA (<15 seconds)
@@ -964,13 +1104,17 @@ len=46 ip=100.49.15.72 ttl=50 DF id=0 sport=80 flags=SA seq=16 win=62727 rtt=20.
 1. **Check HA Status:**
    - On FGT-B (should now be Primary)
    - **System > HA > Status**
-   - Verify role changed to Master
+   - Verify role changed to Primary
+
+   ![ha-fgt-b-primary](images/step11.5.1-ha-fgt-b-primary.png)
 
 2. **Check Azure Load Balancer:**
    - Azure Portal → **Redwood-Hub-internalloadbalancer**
    - **Insights** (under Monitoring)
    - Should show FGT-B as healthy
-   - FGT-A may show unhealthy
+   - FGT-A may show unknow and after a while unhealthy
+
+   ![ilb-status](step11.5.2-ilb-status.png)
 
 > [!NOTE]
 > It can take up to 10 minutes to Azure update the status of the loadbalancer backends
@@ -994,6 +1138,8 @@ len=46 ip=100.49.15.72 ttl=50 DF id=0 sport=80 flags=SA seq=16 win=62727 rtt=20.
    - Health probes restore
    - HA cluster back to normal
 
+    ![fgt-a-back](images/step11.6.2-fgt-a-back.png)
+
 3. **Optional - Fail Back to FGT-A:**
    - If desired, trigger failover again
    - Use this command to trigger a failover: `exec ha failover set 1`
@@ -1003,21 +1149,23 @@ len=46 ip=100.49.15.72 ttl=50 DF id=0 sport=80 flags=SA seq=16 win=62727 rtt=20.
 ### Understanding HA Failover
 
 **Failover Triggers:**
+
 - Device failure (VM crash)
 - Health probe failure
 - Manual failover
 
 **Failover Process:**
-```text
+
 1. Active unit failure detected (<1 second)
 2. Passive assumes active role (~1 second)
-3. Begins responding to health probes (~2-3 seconds)
+3. Begins responding to health probes (~3-5 seconds)
 4. Load balancer updates backend pool (~3-5 seconds)
 5. Traffic redirected to new active unit
-Total: ~5-10 seconds typical
-```
+
+**Total**: ~10-15 seconds typical
 
 **Session Handling:**
+
 - New sessions: Routed to new active immediately
 - Existing sessions: Rebuilt (some packet loss acceptable)
 - Session sync can reduce impact (advanced configuration)
@@ -1074,43 +1222,14 @@ You have successfully configured and validated a complete enterprise-grade Azure
 
 ### Complete Architecture Achieved
 
-```text
-                    Internet ✅
-                       ▲
-                  External LB
-               (Public IP + NAT)
-                       ▲
-         ┌─────────────┴─────────────┐
-         │   FortiGate HA Cluster    │
-         │   ┌───────────────────┐   │
-         │   │ FGT-A ◄──► FGT-B  │   │
-         │   │  HA Sync Working  │   │
-         │   └───────────────────┘   │
-         │                           │
-         │  ✅ Policies Active       │
-         │  ✅ NAT Configured        │
-         │  ✅ Logging Enabled       │
-         │                           │
-         │   Internal LB: 10.100.2.4 │
-         └─────────────┬─────────────┘
-                       │
-              ✅ All traffic inspected
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-   Frontend ✅    Backend ✅      Database ✅
-   10.101.x       10.102.x        10.103.x
-        │              │              │
-   Internet ✅    Internet ✅     Internet ✅
-   Backend ✅     Frontend ✅     Frontend ✅
-   Database ✅    Database ✅     Backend ✅
+![lab4-reference-architecture](images/lab4-reference-architecture.png)
 
 Redwood Industries Multi-Tier Application:
-✅ Fully operational
-✅ Completely secured
-✅ Highly available
-✅ Production-ready
-```
+
+✅ Fully operational  
+✅ Completely secured  
+✅ Highly available  
+✅ Production-ready  
 
 ### Key Takeaways
 
@@ -1147,25 +1266,25 @@ Redwood Industries Multi-Tier Application:
 
 ✅ **Security Requirements Met:**
 
-- All inter-tier and intra-tier traffic inspected ✅
-- Complete logging for compliance ✅
-- Network segmentation enforced ✅
-- Zero-trust architecture achieved ✅
+- All inter-tier and intra-tier traffic inspected
+- Complete logging for compliance
+- Network segmentation enforced
+- Zero-trust architecture achieved
 
 ✅ **Operational Goals Achieved:**
 
-- 99.9% uptime SLA met (HA failover <15s) ✅
-- Centralized management (single pane of glass) ✅
-- Scalable to support growth ✅
-- Operational consistency with on-prem ✅
+- 99.9% uptime SLA met (HA failover <15s)
+- Centralized management (single pane of glass)
+- Scalable to support growth
+- Operational consistency with on-prem
 
 ✅ **Cost Optimization:**
 
-- 67% cost savings vs Azure Firewall ✅
-- Single HA cluster vs multiple firewalls ✅
-- BYOL licensing flexibility ✅
+- 67% cost savings vs Azure Firewall
+- Single HA cluster vs multiple firewalls
+- BYOL licensing flexibility
 
-### Workshop Complete!
+### Workshop Complete
 
 **You can now:**
 
@@ -1215,15 +1334,17 @@ Redwood Industries Multi-Tier Application:
 ### Feedback & Support
 
 **Enjoyed the workshop?**
+
 - Share feedback with your instructor
 - Complete the workshop survey
 - Connect with peers on LinkedIn
 - Join Fortinet Community forums
 
 **Need Help Post-Workshop?**
-- Fortinet Community: https://community.fortinet.com
+
+- Fortinet Community: <https://community.fortinet.com>
 - Azure Support: For Azure-specific issues
-- Partner SE: Your Fortinet Systems Engineer
+- Channel SE: Your Fortinet Security Especialist
 
 ---
 
@@ -1313,16 +1434,16 @@ show firewall policy 1
 1. ✓ Both FortiGates showing in HA cluster
 2. ✓ HA synchronization status: "In Sync"
 3. ✓ Health probes configured on both load balancers
-4. ✓ Port 8008 responding on both FortiGates
+4. ✓ Port 8008 responding on `Primary` FortiGate
 
-**Test Health Probe Manually:**
+**Verify Health Probe Status (Correct Method):**
 
-```bash
-# From another system
-curl -k https://[Internal-LB-IP]:8008
+**From Azure Portal:**
 
-# Should respond when FortiGate is active
-```
+1. Navigate to **Redwood-Hub-internalloadbalancer**
+2. Click **Insights** (under Monitoring)
+3. Explore **View Detailed Matrics**
+   - Should show: 1/2 backend instances healthy (active unit)
 
 ### Issue: Packet Loss Higher Than Expected
 
@@ -1339,7 +1460,6 @@ curl -k https://[Internal-LB-IP]:8008
 **Optimize:**
 
 - Reduce health probe interval to 5 seconds
-- Increase probe failures required to 2 (faster detection)
 
 ---
 
@@ -1349,7 +1469,7 @@ curl -k https://[Internal-LB-IP]:8008
 
 **Instead of 6 separate inter-VNet policies, you could create 2:**
 
-**Option A: Allow All Spokes Bidirectional**
+**Option A**: Allow All Spokes Bidirectional
 
 ```text
 Policy 1:
@@ -1411,76 +1531,6 @@ After completing basic policies, you could add:
 
 ---
 
-## Configuration Backup
-
-### Export FortiGate Configuration
-
-**GUI Method:**
-
-1. **Navigate to Backup:**
-   - **System > Settings**
-   - **Configuration** section
-   - Click **Backup**
-
-2. **Download Config:**
-   - **Scope:** Full configuration
-   - **Encryption:** Optional (recommended for production)
-   - Click **OK**
-   - Save .conf file locally
-
-**CLI Method:**
-
-```bash
-# Show full configuration
-show
-
-# Or export to USB (if attached)
-execute backup config management-station <filename>
-```
-
-### Configuration Review Checklist
-
-Before completing the workshop, verify your configuration includes:
-
-**Address Objects:**
-
-- [ ] Redwood-Frontend-VNet (10.101.0.0/16)
-- [ ] Redwood-Backend-VNet (10.102.0.0/16)
-- [ ] Redwood-Database-VNet (10.103.0.0/16)
-- [ ] Redwood-All-Spokes (address group)
-
-**Static Routes:**
-
-- [ ] Route to 10.101.0.0/16 via 10.100.2.1
-- [ ] Route to 10.102.0.0/16 via 10.100.2.1
-- [ ] Route to 10.103.0.0/16 via 10.100.2.1
-
-**Firewall Policies:**
-
-- [ ] Spokes-to-Internet (NAT ON, port2→port1)
-- [ ] 4× Inter-VNet policies (NAT OFF, port2→port2)
-- [ ] All policies logging enabled
-
-**HA Configuration:**
-
-- [ ] Mode: Active-Passive
-- [ ] 2 members synchronized
-- [ ] Heartbeat interface: port3
-
----
-
-**End of Lab 4 and AZ-102 Workshop**  
-
-*Estimated completion time: 45 minutes*
-
----
-
-*Lab Guide Version 1.0 - December 2024*  
-*Thank you for completing AZ-102!*  
-*Questions? Contact your instructor or Fortinet support.*
-
----
-
 ## Congratulations! 🎊
 
 You've successfully completed **AZ-102: FortiGate HA with Multi-VNet Hub-Spoke Architecture**!
@@ -1489,4 +1539,6 @@ You now have the skills to design, deploy, and manage enterprise-grade Azure sec
 
 **Keep learning, stay secure, and build great things!**
 
-*- The Fortinet Azure Workshop Team*
+---
+
+*Lab Guide Version 1.0 - December 2024*  
