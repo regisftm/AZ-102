@@ -33,7 +33,7 @@ By the end of this lab, you will have:
 
 1. In the Azure Portal, click on **"Subscriptions"** in the left navigation menu
    - If you don't see it, click on **"All services"** and search for **"Subscriptions"**
-2. Note which subscription you'll be using for this bootcamp
+2. Note which subscription you'll be using for this workshop
 3. **Important**: Ensure you're NOT using a production subscription
 
 ### 1.3 Check Subscription Type
@@ -65,7 +65,7 @@ By the end of this lab, you will have:
 ### 2.1 Navigate to Usage + Quotas
 
 1. In your subscription overview, click on **"Settings > Usage + quotas"** in the left menu
-2. Set the **Provider filter** to **"Microsoft.Compute"**
+2. Set the **Provider filter** to **"Compute"**
 3. Set the **Location filter** to **"Canada Central"**
 
 ### 2.2 Verify Required Quotas
