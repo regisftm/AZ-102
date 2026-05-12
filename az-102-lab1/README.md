@@ -4,7 +4,7 @@
 
 **Duration:** 45 minutes  
 **Difficulty:** Intermediate  
-**Prerequisites:** Azure subscription with Contributor access, 2 FortiFlex tokens
+**Prerequisites:** Azure subscription with Contributor access, 2 FortiFlex tokens (provided by your instructor)
 
 ### Objective
 
