@@ -116,7 +116,7 @@ Before proceeding to Lab 1, verify you have completed:
 
 ## Next Steps
 
-Once you've completed this module and verified all prerequisites, you're ready to proceed to [**Lab 1: Hub VNet Infrastructure and FortiGate HA Deployment**](/az-102-lab1/README.md).
+Once you've completed this lab and verified all prerequisites, you're ready to proceed to [**Lab 1: Hub VNet Infrastructure and FortiGate HA Deployment**](/az-102-lab1/README.md).
 
 **Estimated completion time**: 45 minutes
 
