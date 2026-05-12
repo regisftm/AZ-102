@@ -63,7 +63,7 @@ This workshop is organized in sequential laboratories, building on concepts from
 ---
 
 > [!CAUTION]
-> This lab uses several Azure resources including multiple VMs and load balancers. **Expected costs: $20 for the 3-hour workshop if resources are deleted immediately after**. At the end of the workshop, delete all resource groups to avoid ongoing charges or at least stop the VMs if you don't want any unpleasant surprises.
+> This lab uses several Azure resources including multiple VMs and load balancers. **Expected costs: $8 for the 3-hour workshop if resources are deleted immediately after**. At the end of the workshop, delete all resource groups to avoid ongoing charges or at least stop the VMs if you don't want any unpleasant surprises.
 
 ---
 
