@@ -415,13 +415,16 @@ While deployment is running, let's understand what Azure is creating:
 
 ### 5.3 Retrieve Management Public IPs
 
-1. **FortiGate A Management IP:**
+1. **Navigate to Redwood-Hub-RG:**
+   - Go to Resource groups → Redwood-Hub-RG
+
+2. **FortiGate A Management IP:**
    - Click **Redwood-Hub-FGT-A-Mgmt-PIP**
    - Copy the **IP address**
    - Example: `20.220.45.67`
    - Save this for Step 6
 
-2. **FortiGate B Management IP:**
+3. **FortiGate B Management IP:**
    - Click **Redwood-Hub-FGT-B-Mgmt-PIP**
    - Copy the **IP address**
    - Save this for verification
@@ -498,16 +501,15 @@ Before proceeding, verify:
 
    ![ha-status](images/step6.2.2-ha-status.gif)
 
-   > [!NOTE]
    > HA synchronization may take 2-3 minutes after deployment. If cluster status doesn't show 2 members immediately, wait 3 minutes and refresh.
 
 3. **Verify Interfaces:**
    - Navigate to **Network > Interfaces**
    - Verify 4 interfaces present:
-     - **port1** (External): IP from External-Subnet, **Admin. access: Probe Response**
-     - **port2** (Internal): IP from Internal-Subnet, **Admin. access: Probe Response**
+     - **port1** (External): IP from External-Subnet, Admin. access: ***Probe Response**
+     - **port2** (Internal): IP from Internal-Subnet, Admin. access: **Probe Response**
      - **port3** (HA): IP from HASync-Subnet
-     - **port4** (MGMT): IP from Management-Subnet, **Admin. access: PING, HTTPS, SSH, FTM**
+     - **port4** (MGMT): IP from Management-Subnet, Admin. access: **PING, HTTPS, SSH, FTM**
 
    ![network-interface](images/step6.2.3-interfaces.png)
 
@@ -527,7 +529,6 @@ Before proceeding, verify:
 
    ![alt text](images/step6.3-ha-config.gif)
 
-   > [!TIP]
    > If Status shows "Out of Sync", wait 2-3 minutes. Initial config sync can take time. If still out of sync after 5 minutes, check troubleshooting section.
 
 ---
@@ -835,4 +836,4 @@ In Lab 2, you will:
 
 ---
 
-*Lab Guide Version 1.0 - December 2024*
+*Lab Guide Version 1.1 - May 2026*

@@ -76,7 +76,7 @@ Check that you have sufficient quota for these resources in **Canada Central**:
 | --------------- | ---------- | ---------------- |
 | Standard Dalv6 Family vCPUs | 2+ | Search for "Standard Dalv6 Family vCPUs" |
 | Standard BS Family vCPUs | 4+ | Search for "Standard BS Family vCPUs" |
-| Standard Public IP Addresses | 2+ | Search for "Public IP Addresses - Standard" |
+| Standard Public IP Addresses | 4+ | Search for "Public IP Addresses - Standard" |
 
 ![verify-quota.screenshot](images/2.2-verify-quotas.png)
 
