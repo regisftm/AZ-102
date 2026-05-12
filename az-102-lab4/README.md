@@ -802,7 +802,9 @@ VM-2 (10.101.1.5)
 - Higher FortiGate resource usage
 - More complex troubleshooting
 
-> [!TIP] Recommendation:
+>[!TIP]
+>
+> **Recommendation:**
 >
 > Use micro-segmentation when:
 >
