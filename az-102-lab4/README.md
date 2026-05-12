@@ -899,7 +899,7 @@ Create a connectivity matrix to verify all paths:
 | Database | Frontend-VM-2 | ❌ Fail by design | `ping 10.101.1.5` |
 | Database | Backend | ✅ Works | `ping 10.102.1.4` |
 
-*Intra-VNet communication (VM-1 ↔ VM-2) only goes through FortiGate if you configured Step 7.4 (micro-segmentation). Without it, these VMs communicate directly via Azure local routing.
+> Intra-VNet communication (VM-1 ↔ VM-2) only goes through FortiGate if you configured Step 7.4 (micro-segmentation). Without it, these VMs communicate directly via Azure local routing.
 
 ### Validation - Inter-VNet Connectivity
 
@@ -948,8 +948,7 @@ FortiView provides real-time dashboards for understanding traffic patterns.
 #### 10.1 Access FortiView
 
 1. **Navigate to FortiView:**
-   - **Dashboard** → **FortiView Sessions**
-   - Or **FortiView** in left menu
+   - **Dashboard** → **FortiView Source**
 
 #### 10.2 Explore Sources Dashboard
 
@@ -963,8 +962,8 @@ FortiView provides real-time dashboards for understanding traffic patterns.
    ![fortiview-sources](images/step10.2.1-fortiview-sources.png)
 
 2. **Click on a Source:**
-   - Click **10.101.1.4**
-   - See all destinations this source communicated with:
+   - Click **10.101.1.4** then click **Drill down**
+   - See all destinations this source communicated with clicking on **Destination** tab:
      - 10.101.1.5 (Frontend VM-2, if micro-segmentation enabled)
      - 10.102.1.4 (Backend)
      - Internet destinations
@@ -1545,4 +1544,4 @@ You now have the skills to design, deploy, and manage enterprise-grade Azure sec
 
 ---
 
-*Lab Guide Version 1.0 - December 2024*  
+*Lab Guide Version 1.1 - May 2026*  
