@@ -170,10 +170,10 @@ The hub VNet provides the IP address space and subnets for FortiGate HA infrastr
 
 ### Understanding the Subnet Architecture
 
-**Why 4 Subnets for FortiGate HA?**
+**Why 5 Subnets for FortiGate HA?**
 
 | Subnet | Purpose | Traffic Type |
-|--------|---------|--------------|
+| --- | --- | --- |
 | **External** | Internet-facing interface (port1) | North-south (internet) via External LB |
 | **Internal** | Application-facing interface (port2) | East-west (VNet-to-VNet) via Internal LB |
 | **HA Sync** | HA cluster communication (port3) | FGCP, config sync, session sync, heartbeat |
