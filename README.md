@@ -49,6 +49,7 @@ After completing this workshop, you will have deployed the following architectur
 
 This workshop is organized in sequential laboratories, building on concepts from AZ-101.
 
+**Lab 0** - [Getting Start](/az-102-prep/README.md)  
 **Lab 1** - [Hub VNet Infrastructure and FortiGate HA Deployment](/az-102-lab1/README.md)  
 **Lab 2** - [Spoke VNets Deployment and VNet Peering](/az-102-lab2/README.md)  
 **Lab 3** - [User-Defined Routes Configuration](/az-102-lab3/README.md)  
@@ -86,4 +87,4 @@ This workshop is organized in sequential laboratories, building on concepts from
 
 ---
 
-*Workshop Version 1.0* - *December 2024*
+*Workshop Version 1.1* - *May 2026*
