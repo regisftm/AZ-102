@@ -385,7 +385,6 @@ Backend VM (10.102.1.4) receives packet
 
    ![vm-effective-route](images/step11-verify-effective-route.gif)
 
-   > [!NOTE]
    > This confirms the VM is using your UDR
 
 #### 11.2 Repeat for Other VMs (optional)

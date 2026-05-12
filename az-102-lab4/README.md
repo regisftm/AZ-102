@@ -590,7 +590,8 @@ azureuser@Redwood-Frontend-VM-1:~$
 - **policyid:** Which policy matched
 - **sentbyte/rcvdbyte:** Traffic volume
 
-> [!IMPORTANT] Challenge ⚔️
+>[!IMPORTANT]
+> Challenge ⚔️  
 > Where you able to find the DNS request in the logs? Why?
 >
 > Test with the following commands from Frontend-VM-1:
