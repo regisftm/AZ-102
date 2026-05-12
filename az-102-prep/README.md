@@ -4,7 +4,7 @@
 
 ### Overview
 
-Before we begin building, we need to ensure your Azure environment is properly configured. This module will guide you through verifying your subscription access, checking resource quotas, and setting up cost controls.
+Before we begin building, we need to ensure your Azure environment is properly configured. This lab will guide you through verifying your subscription access, checking resource quotas, and setting up cost controls.
 
 ### Prerequisites
 
@@ -14,12 +14,10 @@ Before we begin building, we need to ensure your Azure environment is properly c
 
 ### Learning Objectives
 
-By the end of this module, you will have:
+By the end of this lab, you will have:
 
 - Verified your Azure subscription permissions
-- Confirmed sufficient resource quotas for the bootcamp
-- Set up cost monitoring and alerts
-- Created the foundational resource group structure
+- Confirmed sufficient resource quotas for the workshop
 
 ---
 
