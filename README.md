@@ -76,8 +76,7 @@ This workshop is organized in sequential laboratories, building on concepts from
 
 **Fortinet Documentation:**
 
-- FortiGate Azure HA Guide: <https://docs.fortinet.com/document/fortigate-public-cloud/7.6.0/azure-administration-guide/161167/deploying-fortigate-vm-ha-in-azure>
-- Hub-Spoke Architecture: <https://docs.fortinet.com/document/fortigate-public-cloud/7.6.0/azure-administration-guide/849193/hub-and-spoke-topology>
+- FortiGate Azure HA Guide: <https://docs.fortinet.com/document/fortigate-public-cloud/7.6.0/azure-administration-guide/983245/ha-for-fortigate-vm-on-azure>
 
 **Azure Documentation:**
 
