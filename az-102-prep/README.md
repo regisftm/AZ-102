@@ -95,7 +95,7 @@ If any quotas are insufficient:
 
 ## Step 3: Environment Verification Checklist
 
-Before proceeding to Module 2, verify you have completed:
+Before proceeding to Lab 1, verify you have completed:
 
 - [x] Confirmed subscription access with Contributor or Owner role
 - [x] Verified sufficient quotas in Canada Central region
