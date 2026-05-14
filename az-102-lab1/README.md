@@ -235,10 +235,8 @@ The hub VNet provides the IP address space and subnets for FortiGate HA infrastr
      - ⚠️ **Required:** HA needs 4 NICs, minimum Standard_D8als_v6
      - 8 vCPUs, 16 GB RAM
      - Optimized for network security workloads
-   - **Availability Option:** `Availability Zones`
-     - FortiGate A: Zone 1
-     - FortiGate B: Zone 2
-     - This provides datacenter-level redundancy
+   - **Availability Option:** `Availability Set`
+     - This provides rack-level redundancy
 
 2. **FortiFlex Licensing:**
    - Check **"My organization is using the FortiFlex subscription service"**
