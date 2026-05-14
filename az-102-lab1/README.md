@@ -230,7 +230,7 @@ The hub VNet provides the IP address space and subnets for FortiGate HA infrastr
 
 1. **Instance Tab:**
    - **FortiGate Image SKU:** `Bring Your Own License or FortiFlex`
-   - **FortiGate Image Version:** `7.6.4`
+   - **FortiGate Image Version:** `7.6.6`
    - **Instance Type:** `Standard_D8als_v6`
      - ⚠️ **Required:** HA needs 4 NICs, minimum Standard_D8als_v6
      - 8 vCPUs, 16 GB RAM
