@@ -74,7 +74,7 @@ Check that you have sufficient quota for these resources in **Canada Central**:
 
 | Resource Type | Required | Check Location |
 | --------------- | ---------- | ---------------- |
-| Standard Dalv6 Family vCPUs | 2+ | Search for "Standard Dalv6 Family vCPUs" |
+| Standard Dalv6 Family vCPUs | 16+ | Search for "Standard Dalv6 Family vCPUs" |
 | Standard BS Family vCPUs | 4+ | Search for "Standard BS Family vCPUs" |
 | Standard Public IP Addresses | 4+ | Search for "Public IP Addresses - Standard" |
 
@@ -89,7 +89,7 @@ If any quotas are insufficient:
 3. Submit a support request (this may take 1-2 business days)
 
 > [!NOTE]
-> Most standard subscriptions have sufficient quotas by default. Free trials may require increases.
+> Most standard subscriptions may have sufficient quotas by default. Free trial requires upgrade and quota increases.
 
 ---
 
